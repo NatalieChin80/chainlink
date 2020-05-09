@@ -1,5 +1,5 @@
 name: golang/static
-on: pull_request
+on: [push, pull_request]  # push trigger just for test, should be remove before pr
 jobs:
   vet:
     name: vet
@@ -32,8 +32,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
-      - run: go get -v honnef.co/go/tools/cmd/staticcheck
-      - run: d="$($HOME/go/bin/staticcheck ./...)" && if [ -n "$d" ]; then echo "staticcheck generated output:" ; echo "$d"; exit 1; fi
+      - run: go install honnef.co/go/tools/cmd/staticcheck
+      - run: $HOME/go/bin/staticcheck ./...
   # TODO: Enable linters below one by one and fix issues with each
   # lint:
   #   name: Lint
