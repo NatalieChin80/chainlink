@@ -5,27 +5,35 @@ jobs:
     name: vet
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-go@v2
-    - run: go mod download
-    - run: go vet ./...
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+      - run: go mod download
+      - run: go vet ./...
   shadow:
     name: shadow
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-go@v2
-    - run: go get -v golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow
-    - run: go mod download
-    - run: go vet -vettool=$HOME/go/bin/shadow ./...
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+      - run: go get -v golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow
+      - run: go mod download
+      - run: go vet -vettool=$HOME/go/bin/shadow ./...
   imports:
     name: imports
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-go@v2
-    - run: go get -v golang.org/x/tools/cmd/goimports
-    - run: d="$($HOME/go/bin/goimports -d ./)" && if [ -n "$d" ]; then echo "goimports generated output:" ; echo "$d"; exit 1; fi
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+      - run: go get -v golang.org/x/tools/cmd/goimports
+      - run: d="$($HOME/go/bin/goimports -d ./)" && if [ -n "$d" ]; then echo "goimports generated output:" ; echo "$d"; exit 1; fi
+  staticcheck:
+    name: staticheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+      - run: go get -v honnef.co/go/tools/cmd/staticcheck
+      - run: d="$($HOME/go/bin/staticcheck ./...)" && if [ -n "$d" ]; then echo "staticcheck generated output:" ; echo "$d"; exit 1; fi
   # TODO: Enable linters below one by one and fix issues with each
   # lint:
   #   name: Lint
@@ -36,16 +44,6 @@ jobs:
   #     uses: grandcolline/golang-github-actions@v1.1.0
   #     with:
   #       run: lint
-  #       comment: false
-  # staticcheck:
-  #   name: StaticCheck
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@master
-  #   - name: check
-  #     uses: grandcolline/golang-github-actions@v1.1.0
-  #     with:
-  #       run: staticcheck
   #       comment: false
   # errcheck:
   #   name: errcheck
