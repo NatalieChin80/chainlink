@@ -368,7 +368,7 @@ type TaskType string
 func NewTaskType(val string) (TaskType, error) {
 	re := regexp.MustCompile("^[a-zA-Z0-9-_]*$")
 	if !re.MatchString(val) {
-		return TaskType(""), fmt.Errorf("task Type validation: name %v contains invalid characters", val)
+		return TaskType(""), fmt.Errorf("task type validation: name %v contains invalid characters", val)
 	}
 
 	return TaskType(strings.ToLower(val)), nil
