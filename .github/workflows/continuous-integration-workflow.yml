@@ -11,21 +11,34 @@ jobs:
     runs-on: self-hosted
     container: smartcontract/builder:1.0.34
     env:
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/chainlink_test?sslmode=disable
+      DATABASE_URL: postgres://chainlink@postgres:5432/chainlink_test?sslmode=disable
     services:
       postgres:
         image: postgres
         env:
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+          # CREATE_USER: chainlink
+          # CREATE_DB: chainlink_test
           # Set health checks to wait until postgres has started
-          options: >-
-            --health-cmd pg_isready
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 5
+          # --health-cmd pg_isready
+          # --health-interval 10s
+          #          --health-timeout 5s
+          #          --health-retries 5
+        #options: >-
+        #  --volume ${{env.GITHUB_WORKSPACE}}/.github/workflows/postgres-init:/docker-entrypoint-initdb.d
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v2
+      - name: Set up Postgres user/db
+        uses: docker://postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        with:
+          args: psql -v ON_ERROR_STOP=1 --username postgres -h postgres -c 'CREATE USER chainlink; CREATE DATABASE chainlink_test; GRANT ALL PRIVILEGES ON DATABASE chainlink_test TO chainlink;'
+      - name: Run script
+        run: ./.github/workflows/postgres-setup/create-user.sh
       - name: Cache Yarn dependencies
         uses: actions/cache@v1
         with:
