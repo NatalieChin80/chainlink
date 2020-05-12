@@ -50,11 +50,21 @@ func (etx *EthTx) Perform(input models.RunInput, store *strpkg.Store) models.Run
 }
 
 func (etx *EthTx) perform(input models.RunInput, store *strpkg.Store) models.RunOutput {
-	// TODO: Where to get the task run ID from?
-	// taskRunID := input.
-	// store.CreateEthTransmission(taskRunID, fromAddress, toAddress, encodedPayload)
-	panic("TODO")
-	return models.NewRunOutputError(errors.New("TODO"))
+	taskRunID := input.TaskRunID
+	toAddress := etx.Address
+	value, err := getTxData(etx, input)
+	if err != nil {
+		err = errors.Wrap(err, "while constructing EthTx data")
+		return models.NewRunOutputError(err)
+	}
+
+	encodedPayload := utils.ConcatBytes(etx.FunctionSelector.Bytes(), etx.DataPrefix, value)
+	err, trt := store.UpsertEthTaskRunTransaction(taskRunID, nil, toAddress, encodedPayload)
+	if err != nil {
+		return models.NewRunOutputError(err)
+	}
+
+	return models.NewRunOutputPendingOutgoingConfirmationsWithData(input.Data())
 }
 
 func (etx *EthTx) legacyPerform(input models.RunInput, store *strpkg.Store) models.RunOutput {

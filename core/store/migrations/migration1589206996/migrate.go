@@ -9,7 +9,7 @@ func Migrate(tx *gorm.DB) error {
 	  	CREATE TABLE eth_transactions (
 			id BIGSERIAL PRIMARY KEY,
 			nonce bigint, 
-			from_address bytea NOT NULL,
+			from_address bytea,
 			to_address bytea NOT NULL,
 			encoded_payload bytea NOT NULL,
 			value numeric(78, 0) NOT NULL,
@@ -18,6 +18,10 @@ func Migrate(tx *gorm.DB) error {
 
 		CREATE UNIQUE INDEX idx_eth_transactions_nonce_from_address ON eth_transactions (nonce, from_address);
 		CREATE INDEX idx_eth_transactions_created_at ON eth_transactions USING BRIN (created_at);
+
+		ALTER TABLE eth_transactions ADD CONSTRAINT chk_nonce_requires_from_address CHECK (
+			nonce IS NULL OR from_address IS NOT NULL
+		);
 
 		CREATE TABLE eth_transaction_attempts (
 			id BIGSERIAL PRIMARY KEY,

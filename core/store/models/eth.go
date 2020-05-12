@@ -23,7 +23,7 @@ type EthTaskRunTransaction struct {
 type EthTransaction struct {
 	ID             int64
 	Nonce          *int64
-	FromAddress    common.Address
+	FromAddress    *common.Address
 	ToAddress      common.Address
 	EncodedPayload []byte
 	Value          assets.Eth

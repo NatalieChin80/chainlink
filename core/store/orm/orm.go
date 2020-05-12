@@ -633,7 +633,7 @@ func (orm *ORM) AnyJobWithType(taskTypeName string) (bool, error) {
 }
 
 // CreateEthTaskRunTransaction creates both eth_task_run_transaction and eth_transaction in one hit
-func (orm *ORM) CreateEthTaskRunTransaction(taskRunID models.ID, fromAddress common.Address, toAddress common.Address, encodedPayload []byte) (models.EthTaskRunTransaction, error) {
+func (orm *ORM) UpsertEthTaskRunTransaction(taskRunID models.ID, fromAddress *common.Address, toAddress common.Address, encodedPayload []byte) (models.EthTaskRunTransaction, error) {
 	ethTransaction := models.EthTransaction{
 		FromAddress:    fromAddress,
 		ToAddress:      toAddress,
@@ -648,11 +648,13 @@ func (orm *ORM) CreateEthTaskRunTransaction(taskRunID models.ID, fromAddress com
 			return err
 		}
 		ethTaskRunTransaction.EthTransactionID = ethTransaction.ID
+		// On conflict, means it was already created for this task run, nothing to do in that case
 		if err := dbtx.Save(&ethTaskRunTransaction).Error; err != nil {
 			return err
 		}
 		return nil
 	})
+	// TODO: Check for task_run_id conflict error and ignore
 	return ethTaskRunTransaction, err
 }
 
