@@ -632,6 +632,30 @@ func (orm *ORM) AnyJobWithType(taskTypeName string) (bool, error) {
 	return found, ignoreRecordNotFound(rval)
 }
 
+// CreateEthTaskRunTransaction creates both eth_task_run_transaction and eth_transaction in one hit
+func (orm *ORM) CreateEthTaskRunTransaction(taskRunID models.ID, fromAddress common.Address, toAddress common.Address, encodedPayload []byte) (models.EthTaskRunTransaction, error) {
+	ethTransaction := models.EthTransaction{
+		FromAddress:    fromAddress,
+		ToAddress:      toAddress,
+		EncodedPayload: encodedPayload,
+		Value:          *assets.NewEth(0),
+	}
+	ethTaskRunTransaction := models.EthTaskRunTransaction{
+		TaskRunID: taskRunID,
+	}
+	err := orm.convenientTransaction(func(dbtx *gorm.DB) error {
+		if err := dbtx.Save(&ethTransaction).Error; err != nil {
+			return err
+		}
+		ethTaskRunTransaction.EthTransactionID = ethTransaction.ID
+		if err := dbtx.Save(&ethTaskRunTransaction).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	return ethTaskRunTransaction, err
+}
+
 // CreateTx finds and overwrites a transaction by its surrogate key, if it exists, or
 // creates it
 func (orm *ORM) CreateTx(tx *models.Tx) (*models.Tx, error) {

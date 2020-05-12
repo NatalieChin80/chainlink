@@ -93,6 +93,7 @@ func TestBridge_PerformAcceptsNonJsonObjectResponses(t *testing.T) {
 	defer cleanup()
 	store.Config.Set("BRIDGE_RESPONSE_URL", cltest.WebURL(t, ""))
 	jobRunID := models.NewID()
+	taskRunID := models.NewID()
 
 	mock, cleanup := cltest.NewHTTPMockServer(t, http.StatusOK, "POST", fmt.Sprintf(`{"jobRunID": "%s", "data": 251990120, "statusCode": 200}`, jobRunID.String()),
 		func(h http.Header, b string) {},
@@ -103,7 +104,7 @@ func TestBridge_PerformAcceptsNonJsonObjectResponses(t *testing.T) {
 	params := cltest.JSONFromString(t, `{"bodyParam": true}`)
 	ba := &adapters.Bridge{BridgeType: *bt, Params: params}
 
-	input := *models.NewRunInput(jobRunID, cltest.JSONFromString(t, `{"jobRunID": "jobID", "data": 251990120, "statusCode": 200}`), models.RunStatusUnstarted)
+	input := *models.NewRunInput(jobRunID, taskRunID, cltest.JSONFromString(t, `{"jobRunID": "jobID", "data": 251990120, "statusCode": 200}`), models.RunStatusUnstarted)
 	result := ba.Perform(input, store)
 	require.NoError(t, result.Error())
 	assert.Equal(t, "251990120", result.Result().String())

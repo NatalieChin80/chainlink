@@ -41,7 +41,22 @@ func (e *EthTx) TaskType() models.TaskType {
 // Perform creates the run result for the transaction if the existing run result
 // is not currently pending. Then it confirms the transaction was confirmed on
 // the blockchain.
-func (e *EthTx) Perform(input models.RunInput, store *strpkg.Store) models.RunOutput {
+func (etx *EthTx) Perform(input models.RunInput, store *strpkg.Store) models.RunOutput {
+	if store.Config.EnableBulletproofTxManager() {
+		return etx.perform(input, store)
+	} else {
+		return etx.legacyPerform(input, store)
+	}
+}
+
+func (etx *EthTx) perform(input models.RunInput, store *strpkg.Store) models.RunOutput {
+	// TODO: Where to get the task run ID from?
+	// taskRunID := input.
+	// store.CreateEthTransmission(taskRunID, fromAddress, toAddress, encodedPayload)
+	return models.NewRunOutputError(errors.New("TODO"))
+}
+
+func (etx *EthTx) legacyPerform(input models.RunInput, store *strpkg.Store) models.RunOutput {
 	if !store.TxManager.Connected() {
 		return pendingOutgoingConfirmationsOrConnection(input)
 	}

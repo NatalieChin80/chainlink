@@ -8,7 +8,7 @@ func Migrate(tx *gorm.DB) error {
 	return tx.Exec(`
 	  	CREATE TABLE eth_transactions (
 			id BIGSERIAL PRIMARY KEY,
-			nonce bigint NOT NULL,
+			nonce bigint, 
 			from_address bytea NOT NULL,
 			to_address bytea NOT NULL,
 			encoded_payload bytea NOT NULL,
@@ -48,19 +48,12 @@ func Migrate(tx *gorm.DB) error {
 		CREATE INDEX idx_eth_transactions_confirmed_in_block_num ON eth_transaction_attempts (confirmed_in_block_num) WHERE confirmed_in_block_num IS NOT NULL;
 		CREATE INDEX idx_eth_transactions_attempts_created_at ON eth_transaction_attempts USING BRIN (created_at);
 
-		CREATE TABLE eth_transmissions (
-			id BIGSERIAL PRIMARY KEY,
+		CREATE TABLE eth_task_run_transactions (
 			task_run_id uuid NOT NULL REFERENCES task_runs (id) ON DELETE CASCADE,
-			eth_transaction_id bigint REFERENCES eth_transactions (id) ON DELETE CASCADE,
-			from_address bytea NOT NULL,
-			to_address bytea NOT NULL,
-			encoded_payload bytea NOT NULL,
-			created_at timestamptz NOT NULL
+			eth_transaction_id bigint NOT NULL REFERENCES eth_transactions (id) ON DELETE CASCADE
 		);
 
 		CREATE UNIQUE INDEX idx_eth_transmissions_task_run_id ON eth_transmissions (task_run_id);
 		CREATE UNIQUE INDEX idx_eth_transmissions_eth_transaction_id ON eth_transmissions (eth_transaction_id);
-		CREATE INDEX idx_eth_transmissions_created_at ON eth_transmissions USING BRIN (created_at);
-
 	`).Error
 }

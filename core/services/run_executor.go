@@ -53,7 +53,7 @@ func (re *runExecutor) Execute(runID *models.ID) error {
 	}
 
 	for taskIndex := range run.TaskRuns {
-		taskRun := &run.TaskRuns[taskIndex]
+		taskRun := run.TaskRuns[taskIndex]
 		if !run.GetStatus().Runnable() {
 			logger.Debugw("Run execution blocked", run.ForLogger("task", taskRun.ID.String())...)
 			break
@@ -63,7 +63,7 @@ func (re *runExecutor) Execute(runID *models.ID) error {
 			continue
 		}
 
-		if meetsMinRequiredIncomingConfirmations(&run, taskRun, run.ObservedHeight) {
+		if meetsMinRequiredIncomingConfirmations(&run, &taskRun, run.ObservedHeight) {
 			start := time.Now()
 
 			// NOTE: adapters may define and return the new job run status in here
@@ -105,16 +105,16 @@ func (re *runExecutor) Execute(runID *models.ID) error {
 	return nil
 }
 
-func (re *runExecutor) executeTask(run *models.JobRun, taskRun *models.TaskRun) models.RunOutput {
-	taskCopy := taskRun.TaskSpec // deliberately copied to keep mutations local
+func (re *runExecutor) executeTask(run *models.JobRun, taskRun models.TaskRun) models.RunOutput {
+	taskSpec := taskRun.TaskSpec
 
-	params, err := models.Merge(run.RunRequest.RequestParams, taskCopy.Params)
+	params, err := models.Merge(run.RunRequest.RequestParams, taskSpec.Params)
 	if err != nil {
 		return models.NewRunOutputError(err)
 	}
-	taskCopy.Params = params
+	taskSpec.Params = params
 
-	adapter, err := adapters.For(taskCopy, re.store.Config, re.store.ORM)
+	adapter, err := adapters.For(taskSpec, re.store.Config, re.store.ORM)
 	if err != nil {
 		return models.NewRunOutputError(err)
 	}
@@ -131,7 +131,7 @@ func (re *runExecutor) executeTask(run *models.JobRun, taskRun *models.TaskRun) 
 		return models.NewRunOutputError(err)
 	}
 
-	input := *models.NewRunInput(run.ID, data, taskRun.Status)
+	input := *models.NewRunInput(run.ID, *taskRun.ID, data, taskRun.Status)
 	result := adapter.Perform(input, re.store)
 	promAdapterCallsVec.WithLabelValues(run.JobSpecID.String(), string(adapter.TaskType()), string(result.Status())).Inc()
 
