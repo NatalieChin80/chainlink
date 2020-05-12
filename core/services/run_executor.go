@@ -53,7 +53,7 @@ func (re *runExecutor) Execute(runID *models.ID) error {
 	}
 
 	for taskIndex := range run.TaskRuns {
-		taskRun := run.TaskRuns[taskIndex]
+		taskRun := &run.TaskRuns[taskIndex]
 		if !run.GetStatus().Runnable() {
 			logger.Debugw("Run execution blocked", run.ForLogger("task", taskRun.ID.String())...)
 			break

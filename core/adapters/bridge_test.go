@@ -93,7 +93,7 @@ func TestBridge_PerformAcceptsNonJsonObjectResponses(t *testing.T) {
 	defer cleanup()
 	store.Config.Set("BRIDGE_RESPONSE_URL", cltest.WebURL(t, ""))
 	jobRunID := models.NewID()
-	taskRunID := models.NewID()
+	taskRunID := *models.NewID()
 
 	mock, cleanup := cltest.NewHTTPMockServer(t, http.StatusOK, "POST", fmt.Sprintf(`{"jobRunID": "%s", "data": 251990120, "statusCode": 200}`, jobRunID.String()),
 		func(h http.Header, b string) {},
@@ -133,7 +133,7 @@ func TestBridge_Perform_transitionsTo(t *testing.T) {
 			_, bt := cltest.NewBridgeType(t, "auctionBidding", mock.URL)
 			ba := &adapters.Bridge{BridgeType: *bt}
 
-			input := *models.NewRunInputWithResult(models.NewID(), "100", test.status)
+			input := *models.NewRunInputWithResult(models.NewID(), *models.NewID(), "100", test.status)
 			result := ba.Perform(input, store)
 
 			assert.Equal(t, test.result, result.Data().String())
@@ -165,6 +165,7 @@ func TestBridge_Perform_startANewRun(t *testing.T) {
 	defer cleanup()
 	store.Config.Set("BRIDGE_RESPONSE_URL", "")
 	runID := models.NewID()
+	taskRunID := *models.NewID()
 	wantedBody := fmt.Sprintf(`{"id":"%v","data":{"result":"lot 49"}}`, runID)
 
 	for _, test := range cases {
@@ -178,7 +179,7 @@ func TestBridge_Perform_startANewRun(t *testing.T) {
 			_, bt := cltest.NewBridgeType(t, "auctionBidding", mock.URL)
 			eb := &adapters.Bridge{BridgeType: *bt}
 
-			input := *models.NewRunInput(runID, cltest.JSONFromString(t, `{"result": "lot 49"}`), models.RunStatusUnstarted)
+			input := *models.NewRunInput(runID, taskRunID, cltest.JSONFromString(t, `{"result": "lot 49"}`), models.RunStatusUnstarted)
 			result := eb.Perform(input, store)
 			val := result.Result()
 			assert.Equal(t, test.want, val.String())

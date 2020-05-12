@@ -68,7 +68,10 @@ func (ri RunInput) JobRunID() *ID {
 }
 
 func (ri RunInput) CloneWithData(data JSON) RunInput {
+	fmt.Println("ri", ri)
 	newInput := ri
 	newInput.data = data
+	fmt.Println("ri", ri)
+	fmt.Println("newInput", newInput)
 	return newInput
 }

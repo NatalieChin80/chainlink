@@ -53,7 +53,7 @@ func Migrate(tx *gorm.DB) error {
 			eth_transaction_id bigint NOT NULL REFERENCES eth_transactions (id) ON DELETE CASCADE
 		);
 
-		CREATE UNIQUE INDEX idx_eth_transmissions_task_run_id ON eth_transmissions (task_run_id);
-		CREATE UNIQUE INDEX idx_eth_transmissions_eth_transaction_id ON eth_transmissions (eth_transaction_id);
+		CREATE UNIQUE INDEX idx_eth_task_run_transactions_task_run_id ON eth_task_run_transactions (task_run_id);
+		CREATE UNIQUE INDEX idx_eth_task_run_transactions_eth_transaction_id ON eth_task_run_transactions (eth_transaction_id);
 	`).Error
 }
