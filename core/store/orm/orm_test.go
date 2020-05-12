@@ -1538,3 +1538,26 @@ func TestJobs_SQLiteBatchSizeIntegrity(t *testing.T) {
 
 	assert.Equal(t, jobNumber, counter)
 }
+
+func TestORM_EthTaskRunTransaction_FindUpsert(t *testing.T) {
+	store, cleanup := cltest.NewStore(t)
+	defer cleanup()
+
+	taskRunID := cltest.MustInsertTaskRun(t, store)
+
+	t.Run("creates eth_task_run_transaction and eth_transaction", func(t *testing.T) {
+		fromAddress := cltest.NewAddress()
+		toAddress := cltest.NewAddress()
+		encodedPayload := []byte{0, 1, 2}
+
+		err := store.UpsertEthTaskRunTransaction(taskRunID, &fromAddress, toAddress, encodedPayload)
+		require.NoError(t, err)
+
+		etrt, err := store.FindEthTaskRunTransactionByTaskRunID(taskRunID)
+		require.NoError(t, err)
+
+		assert.Equal(t, etrt, "foo")
+	})
+	// t.Run("handles nil from address")
+	// t.Run("does nothing if it already exists")
+}

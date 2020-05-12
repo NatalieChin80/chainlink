@@ -707,3 +707,15 @@ func NewPollingDeviationChecker(t *testing.T, s *store.Store) *fluxmonitor.Polli
 	require.NoError(t, err)
 	return checker
 }
+
+func MustInsertTaskRun(t *testing.T, store *store.Store) models.ID {
+	taskRunID := models.NewID()
+
+	job := NewJobWithWebInitiator()
+	require.NoError(t, store.CreateJob(&job))
+	jobRun := NewJobRun(job)
+	jobRun.TaskRuns = []models.TaskRun{models.TaskRun{ID: taskRunID, Status: models.RunStatusUnstarted, TaskSpecID: job.Tasks[0].ID}}
+	require.NoError(t, store.CreateJobRun(&jobRun))
+
+	return *taskRunID
+}

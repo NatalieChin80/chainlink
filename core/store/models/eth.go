@@ -15,7 +15,7 @@ import (
 )
 
 type EthTaskRunTransaction struct {
-	TaskRunID        ID
+	TaskRunID        *ID
 	EthTransactionID int64
 	EthTransaction   EthTransaction
 }
@@ -26,7 +26,7 @@ type EthTransaction struct {
 	FromAddress    *common.Address
 	ToAddress      common.Address
 	EncodedPayload []byte
-	Value          assets.Eth
+	Value          *assets.Eth
 	CreatedAt      time.Time
 }
 

@@ -638,10 +638,10 @@ func (orm *ORM) UpsertEthTaskRunTransaction(taskRunID models.ID, fromAddress *co
 		FromAddress:    fromAddress,
 		ToAddress:      toAddress,
 		EncodedPayload: encodedPayload,
-		Value:          *assets.NewEth(0),
+		Value:          assets.NewEth(0),
 	}
 	ethTaskRunTransaction := models.EthTaskRunTransaction{
-		TaskRunID: taskRunID,
+		TaskRunID: &taskRunID,
 	}
 	err := orm.convenientTransaction(func(dbtx *gorm.DB) error {
 		if err := dbtx.Save(&ethTransaction).Error; err != nil {
@@ -656,6 +656,12 @@ func (orm *ORM) UpsertEthTaskRunTransaction(taskRunID models.ID, fromAddress *co
 	})
 	// TODO: Check for task_run_id conflict error and ignore
 	return err
+}
+
+func (orm *ORM) FindEthTaskRunTransactionByTaskRunID(taskRunID models.ID) (*models.EthTaskRunTransaction, error) {
+	etrt := &models.EthTaskRunTransaction{}
+	err := orm.db.Preload("EthTransaction").First(etrt, "task_run_id = ?", taskRunID).Error
+	return etrt, err
 }
 
 // CreateTx finds and overwrites a transaction by its surrogate key, if it exists, or
