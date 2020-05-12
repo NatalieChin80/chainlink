@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/jinzhu/gorm"
+	// "github.com/satori/go.uuid"
 	null "gopkg.in/guregu/null.v3"
 )
 

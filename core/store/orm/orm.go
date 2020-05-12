@@ -660,7 +660,7 @@ func (orm *ORM) UpsertEthTaskRunTransaction(taskRunID models.ID, fromAddress *co
 
 func (orm *ORM) FindEthTaskRunTransactionByTaskRunID(taskRunID models.ID) (*models.EthTaskRunTransaction, error) {
 	etrt := &models.EthTaskRunTransaction{}
-	err := orm.db.Preload("EthTransaction").First(etrt, "task_run_id = ?", taskRunID).Error
+	err := orm.db.Preload("EthTransaction").First(etrt, "task_run_id = ?", &taskRunID).Error
 	return etrt, err
 }
 
