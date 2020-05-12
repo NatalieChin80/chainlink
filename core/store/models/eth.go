@@ -11,12 +11,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/jinzhu/gorm"
-	// "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 	null "gopkg.in/guregu/null.v3"
 )
 
 type EthTaskRunTransaction struct {
-	TaskRunID        *ID
+	TaskRunID        uuid.UUID
 	EthTransactionID int64
 	EthTransaction   EthTransaction
 }
