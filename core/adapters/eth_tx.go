@@ -50,17 +50,16 @@ func (etx *EthTx) Perform(input models.RunInput, store *strpkg.Store) models.Run
 }
 
 func (etx *EthTx) perform(input models.RunInput, store *strpkg.Store) models.RunOutput {
-	taskRunID := input.TaskRunID
-	toAddress := etx.Address
 	value, err := getTxData(etx, input)
 	if err != nil {
 		err = errors.Wrap(err, "while constructing EthTx data")
 		return models.NewRunOutputError(err)
 	}
 
+	taskRunID := input.TaskRunID()
+	toAddress := etx.Address
 	encodedPayload := utils.ConcatBytes(etx.FunctionSelector.Bytes(), etx.DataPrefix, value)
-	err, trt := store.UpsertEthTaskRunTransaction(taskRunID, nil, toAddress, encodedPayload)
-	if err != nil {
+	if err := store.UpsertEthTaskRunTransaction(taskRunID, nil, toAddress, encodedPayload); err != nil {
 		return models.NewRunOutputError(err)
 	}
 
@@ -76,14 +75,14 @@ func (etx *EthTx) legacyPerform(input models.RunInput, store *strpkg.Store) mode
 		return ensureTxRunResult(input, store)
 	}
 
-	value, err := getTxData(e, input)
+	value, err := getTxData(etx, input)
 	if err != nil {
 		err = errors.Wrap(err, "while constructing EthTx data")
 		return models.NewRunOutputError(err)
 	}
 
-	data := utils.ConcatBytes(e.FunctionSelector.Bytes(), e.DataPrefix, value)
-	return createTxRunResult(e.Address, e.GasPrice, e.GasLimit, data, input, store)
+	data := utils.ConcatBytes(etx.FunctionSelector.Bytes(), etx.DataPrefix, value)
+	return createTxRunResult(etx.Address, etx.GasPrice, etx.GasLimit, data, input, store)
 }
 
 // getTxData returns the data to save against the callback encoded according to

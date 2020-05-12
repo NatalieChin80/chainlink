@@ -63,11 +63,11 @@ func (re *runExecutor) Execute(runID *models.ID) error {
 			continue
 		}
 
-		if meetsMinRequiredIncomingConfirmations(&run, &taskRun, run.ObservedHeight) {
+		if meetsMinRequiredIncomingConfirmations(&run, taskRun, run.ObservedHeight) {
 			start := time.Now()
 
 			// NOTE: adapters may define and return the new job run status in here
-			result := re.executeTask(&run, taskRun)
+			result := re.executeTask(&run, *taskRun)
 
 			taskRun.ApplyOutput(result)
 			run.ApplyOutput(result)

@@ -67,11 +67,12 @@ func (ri RunInput) JobRunID() *ID {
 	return &ri.jobRunID
 }
 
+// TaskRunID returns this RunInput's TaskRunID
+func (ri RunInput) TaskRunID() ID {
+	return ri.taskRunID
+}
+
 func (ri RunInput) CloneWithData(data JSON) RunInput {
-	fmt.Println("ri", ri)
-	newInput := ri
-	newInput.data = data
-	fmt.Println("ri", ri)
-	fmt.Println("newInput", newInput)
-	return newInput
+	ri.data = data
+	return ri
 }

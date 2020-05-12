@@ -633,7 +633,7 @@ func (orm *ORM) AnyJobWithType(taskTypeName string) (bool, error) {
 }
 
 // CreateEthTaskRunTransaction creates both eth_task_run_transaction and eth_transaction in one hit
-func (orm *ORM) UpsertEthTaskRunTransaction(taskRunID models.ID, fromAddress *common.Address, toAddress common.Address, encodedPayload []byte) (models.EthTaskRunTransaction, error) {
+func (orm *ORM) UpsertEthTaskRunTransaction(taskRunID models.ID, fromAddress *common.Address, toAddress common.Address, encodedPayload []byte) error {
 	ethTransaction := models.EthTransaction{
 		FromAddress:    fromAddress,
 		ToAddress:      toAddress,
@@ -655,7 +655,7 @@ func (orm *ORM) UpsertEthTaskRunTransaction(taskRunID models.ID, fromAddress *co
 		return nil
 	})
 	// TODO: Check for task_run_id conflict error and ignore
-	return ethTaskRunTransaction, err
+	return err
 }
 
 // CreateTx finds and overwrites a transaction by its surrogate key, if it exists, or
